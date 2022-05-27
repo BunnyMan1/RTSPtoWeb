@@ -1,55 +1,148 @@
 {
-   "channel_defaults": {
-      "on_demand": true
-   },
-   "server": {
-      "debug": true,
-      "http_debug": false,
-      "http_demo": true,
-      "http_dir": "web",
-      "http_login": "admin",
-      "http_password": "password",
-      "http_port": ":8083",
-      "https": false,
-      "https_auto_tls": false,
-      "https_auto_tls_name": "",
-      "https_cert": "server.crt",
-      "https_key": "server.key",
-      "https_port": ":443",
-      "ice_servers": ["stun:stun.l.google.com:19302"],
-      "log_level": "debug",
-      "rtsp_port": ":5541",
-      "token": {
-         "backend": "http://localhost:5000/api/common/v1/cctv/check_token",
-         "enable": true
+  "channel_defaults": {
+    "on_demand": true
+  },
+  "server": {
+    "debug": true,
+    "http_debug": false,
+    "http_demo": true,
+    "http_dir": "web",
+    "http_login": "admin",
+    "http_password": "password",
+    "http_port": ":8083",
+    "https": false,
+    "https_auto_tls": false,
+    "https_auto_tls_name": "",
+    "https_cert": "server.crt",
+    "https_key": "server.key",
+    "https_port": ":443",
+    "ice_credential": "",
+    "ice_servers": [
+      "stun:stun.l.google.com:19302"
+    ],
+    "ice_username": "",
+    "log_level": "debug",
+    "rtsp_port": ":5541",
+    "token": {
+      "backend": "http://localhost:5000/api/common/v1/cctv/check_token",
+      "enable": true
+    },
+    "webrtc_port_max": 0,
+    "webrtc_port_min": 0
+  },
+  "streams": {
+    "87": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/102"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/101"
+        }
       },
-      "defaults": {
-         "audio": false
-      }
-   },
-   "streams": {
-      "defaultdemo": {
-         "channels": {
-            "0": {
-               "audio": true,
-               "on_demand": true,
-               "url": "rtmp://171.25.232.10/12d525bc9f014e209c1280bc0d46a87e"
-            }
-         },
-         "name": "defaultdemo"
+      "name": "HYD-UPL_17_1"
+    },
+    "88": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/202"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/201"
+        }
       },
-      "demo1": {
-         "channels": {
-            "1": {
-               "on_demand": true,
-               "url": "rtsp://admin:admin%40123@124.123.111.10/Streaming/Channels/101"
-            },
-            "2": {
-               "on_demand": true,
-               "url": "rtsp://admin:admin%40123@124.123.111.10/Streaming/Channels/102"
-            }
-         },
-         "name": "HYD-ANNAPURNA-BL-938 - 10"
-      }
-   }
+      "name": "HYD-UPL_17_2"
+    },
+    "89": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/302"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/301"
+        }
+      },
+      "name": "HYD-UPL_17_3"
+    },
+    "90": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/402"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/401"
+        }
+      },
+      "name": "HYD-UPL_17_4"
+    },
+    "91": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/502"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/501"
+        }
+      },
+      "name": "HYD-UPL_17_5"
+    },
+    "92": {
+      "channels": {
+        "0": {
+          "name": "MainStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/602"
+        },
+        "1": {
+          "name": "SubStream",
+          "on_demand": true,
+          "url": "rtsp://admin:admin123@49.207.1.5/Streaming/Channels/601"
+        }
+      },
+      "name": "HYD-UPL_17_6"
+    },
+    "defaultdemo": {
+      "channels": {
+        "0": {
+          "audio": true,
+          "on_demand": true,
+          "url": "rtmp://171.25.232.10/12d525bc9f014e209c1280bc0d46a87e"
+        }
+      },
+      "name": "defaultdemo"
+    },
+    "demo1": {
+      "channels": {
+        "1": {
+          "on_demand": true,
+          "url": "rtsp://admin:admin%40123@124.123.111.10/Streaming/Channels/101"
+        },
+        "2": {
+          "on_demand": true,
+          "url": "rtsp://admin:admin%40123@124.123.111.10/Streaming/Channels/102"
+        }
+      },
+      "name": "HYD-ANNAPURNA-BL-938 - 10"
+    }
+  }
 }
