@@ -23,3 +23,11 @@ Renew SSL Certificate:
 - sudo service cctvserver restart
 
 - Check working status in nConnect
+
+Security note:
+- Prod server is currently on "sudo ufw default allow incoming" & "sudo ufw default allow outgoing".
+- with only 8083 and 8084 ports blocked.
+- Rest are all open.
+
+Check Logs:
+- sudo journalctl -u cctvserver.service -f --since "1 second ago"
