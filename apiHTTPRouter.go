@@ -8,16 +8,15 @@ import (
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/websocket"
 )
 
-//Message resp struct
+// Message resp struct
 type Message struct {
 	Status  int         `json:"status"`
 	Payload interface{} `json:"payload"`
 }
 
-//HTTPAPIServer start http server routes
+// HTTPAPIServer start http server routes
 func HTTPAPIServer() {
 	//Set HTTP API mode
 	log.WithFields(logrus.Fields{
@@ -40,13 +39,13 @@ func HTTPAPIServer() {
 	if Storage.ServerHTTPLogin() != "" && Storage.ServerHTTPPassword() != "" {
 		privat.Use(gin.BasicAuth(gin.Accounts{Storage.ServerHTTPLogin(): Storage.ServerHTTPPassword()}))
 	}
-	public.LoadHTMLGlob(Storage.ServerHTTPDir() + "/templates/*")
 
 	/*
-		Html template
+		Static HTML Files Demo Mode
 	*/
 
 	if Storage.ServerHTTPDemo() {
+		public.LoadHTMLGlob(Storage.ServerHTTPDir() + "/templates/*")
 		public.GET("/", HTTPAPIServerIndex)
 		public.GET("/pages/stream/list", HTTPAPIStreamList)
 		public.GET("/pages/stream/add", HTTPAPIAddStream)
@@ -58,6 +57,7 @@ func HTTPAPIServer() {
 		public.Any("/pages/multiview/full", HTTPAPIFullScreenMultiView)
 		public.GET("/pages/documentation", HTTPAPIServerDocumentation)
 		public.GET("/pages/player/all/:uuid/:channel", HTTPAPIPlayAll)
+		public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
 	}
 
 	/*
@@ -95,23 +95,19 @@ func HTTPAPIServer() {
 	//HLS
 	public.GET("/stream/:uuid/channel/:channel/hls/live/index.m3u8", HTTPAPIServerStreamHLSM3U8)
 	public.GET("/stream/:uuid/channel/:channel/hls/live/segment/:seq/file.ts", HTTPAPIServerStreamHLSTS)
+	//HLS remote record
+	//public.GET("/stream/:uuid/channel/:channel/hls/rr/:s/:e/index.m3u8", HTTPAPIServerStreamRRM3U8)
+	//public.GET("/stream/:uuid/channel/:channel/hls/rr/:s/:e/:seq/file.ts", HTTPAPIServerStreamRRTS)
 	//HLS LL
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/index.m3u8", HTTPAPIServerStreamHLSLLM3U8)
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/init.mp4", HTTPAPIServerStreamHLSLLInit)
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/segment/:segment/:any", HTTPAPIServerStreamHLSLLM4Segment)
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/fragment/:segment/:fragment/:any", HTTPAPIServerStreamHLSLLM4Fragment)
 	//MSE
-	public.GET("/stream/:uuid/channel/:channel/mse", func(c *gin.Context) {
-		handler := websocket.Handler(HTTPAPIServerStreamMSE)
-		handler.ServeHTTP(c.Writer, c.Request)
-	})
+	public.GET("/stream/:uuid/channel/:channel/mse", HTTPAPIServerStreamMSE)
 	public.POST("/stream/:uuid/channel/:channel/webrtc", HTTPAPIServerStreamWebRTC)
-	/*
-		Static HTML Files Demo Mode
-	*/
-	if Storage.ServerHTTPDemo() {
-		public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
-	}
+	//Save fragment to mp4
+	public.GET("/stream/:uuid/channel/:channel/save/mp4/fragment/:duration", HTTPAPIServerStreamSaveToMP4)
 	/*
 		HTTPS Mode Cert
 		# Key considerations for algorithm "RSA" ≥ 2048-bit
@@ -158,7 +154,7 @@ func HTTPAPIServer() {
 
 }
 
-//HTTPAPIServerIndex index file
+// HTTPAPIServerIndex index file
 func HTTPAPIServerIndex(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
 		"port":    Storage.ServerHTTPPort(),
@@ -290,7 +286,7 @@ func HTTPAPIFullScreenMultiView(c *gin.Context) {
 	})
 }
 
-//CrossOrigin Access-Control-Allow-Origin any methods
+// CrossOrigin Access-Control-Allow-Origin any methods
 func CrossOrigin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
