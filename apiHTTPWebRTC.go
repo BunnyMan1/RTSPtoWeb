@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//HTTPAPIServerStreamWebRTC stream video over WebRTC
+// HTTPAPIServerStreamWebRTC stream video over WebRTC
 func HTTPAPIServerStreamWebRTC(c *gin.Context) {
 	requestLogger := log.WithFields(logrus.Fields{
 		"module":  "http_webrtc",
@@ -28,7 +28,7 @@ func HTTPAPIServerStreamWebRTC(c *gin.Context) {
 	if !RemoteAuthorization("WebRTC", c.Param("uuid"), c.Param("channel"), c.Query("token"), c.ClientIP()) {
 		requestLogger.WithFields(logrus.Fields{
 			"call": "RemoteAuthorization",
-		}).Errorln(ErrorStreamUnauthorized.Error())
+		}).Errorln(ErrorStreamNotFound.Error())
 		return
 	}
 

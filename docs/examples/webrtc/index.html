@@ -1,18 +1,23 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>RTSPtoWeb WebRTC example</title>
-  </head>
-  <body>
-    <h1>RTSPtoWeb WebRTC example</h1>
 
-    <input type="hidden" name="webrtc-url" id="webrtc-url"
-        value="http://localhost:8083/stream/demo/channel/0/webrtc">
+<head>
+  <meta charset="utf-8">
+  <title>RTSPtoWeb WebRTC example</title>
+</head>
 
-    <video id="webrtc-video" autoplay muted playsinline controls
-        style="max-width: 100%; max-height: 100%;"></video>
+<body>
+  <h1>RTSPtoWeb WebRTC example</h1>
 
-    <script src="main.js"></script>
-  </body>
+  <!-- <input type="hidden" name="webrtc-url" id="webrtc-url" value="http://localhost:8083/stream/113/channel/2/webrtc?token=a"> -->
+  <input type="hidden" name="webrtc-url" id="webrtc-url"
+    value="http://localhost:8083/stream/89/channel/0/webrtc?uuid=89&channel=0&token=allow">
+
+  <video id="webrtc-video" autoplay muted playsinline controls style="max-width: 100%; max-height: 100%;"></video>
+  <button id="btn-start">Start</button>
+  <button id="btn-end">End</button>
+
+  <script src="main.js"></script>
+</body>
+
 </html>

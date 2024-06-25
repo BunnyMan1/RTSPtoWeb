@@ -1,0 +1,54 @@
+Build Server in Prod:
+- cd apps/rtsp_to_web/
+- gvm use go1.20
+- sudo service cctvserver stop
+- make build
+- sudo service cctvserver start
+
+- Note: Check working status in nConnect.
+
+------------------------------
+
+Run Dev Server:
+- make run
+
+------------------------------
+
+Dev Server Run on 0.0.0.0 host for MacOS:
+- Activate "System Preferences > Sharing > Remote Login"
+- make run
+- Run command:
+    ssh -N -L 0.0.0.0:8084:127.0.0.1:8083 127.0.0.1
+- Access CCTV Server on port 8084 externally.
+
+------------------------------
+
+Renew SSL Certificate:
+- ssh nconnect_cctv
+- sudo su
+- (Optional if certbot automatically renewed the certificates) sudo certbot renew
+- cd /etc/letsencrypt/live/cctvservice.narayanagroup.com/
+- openssl pkey -in privkey.pem -out /home/bunny/cert.key
+- openssl crl2pkcs7 -nocrl -certfile fullchain.pem | openssl pkcs7 -print_certs -out /home/bunny/cert.crt
+- exit
+- cd /home/bunny
+- sudo mv cert.key apps/rtsp_to_web/cctv.key
+- sudo mv cert.crt apps/rtsp_to_web/cctv.crt
+- cd apps/rtsp_to_web/
+- sudo chmod 755 cctv.key
+- sudo chmod 755 cctv.crt
+- sudo service cctvserver restart
+
+- Note: Check working status in nConnect
+
+------------------------------
+
+Security note:
+- Prod server is currently on "sudo ufw default allow incoming" & "sudo ufw default allow outgoing".
+- with only 8083 and 8084 ports blocked.
+- Rest are all open.
+
+------------------------------
+
+Check Logs:
+- sudo journalctl -u cctvserver.service -f --since "1 second ago"
