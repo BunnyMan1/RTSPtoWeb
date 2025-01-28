@@ -1,3 +1,5 @@
+Create a new file called config.json and copy the text in dev_config.txt and paste it in this file.
+
 Build Server in Prod:
 - cd apps/rtsp_to_web/
 - gvm use go1.20
