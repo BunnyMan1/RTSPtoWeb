@@ -40,7 +40,6 @@ var (
 	ErrorStreamChannelNotFound      = errors.New("stream channel not found")
 	ErrorStreamChannelCodecNotFound = errors.New("stream channel codec not ready, possible stream offline")
 	ErrorStreamsLen0                = errors.New("streams len zero")
-	ErrorStreamUnauthorized         = errors.New("stream request unauthorized")
 )
 
 // StorageST main storage struct
@@ -102,8 +101,6 @@ type ChannelST struct {
 	signals            chan int
 	hlsSegmentBuffer   map[int]SegmentOld
 	hlsSegmentNumber   int
-	hlsSequence        int
-	hlsLastDur         int
 	clients            map[string]ClientST
 	ack                time.Time
 	hlsMuxer           *MuxerHLS `json:"-"`

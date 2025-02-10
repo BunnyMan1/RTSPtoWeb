@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/websocket"
 )
 
 // Message resp struct
@@ -41,7 +42,7 @@ func HTTPAPIServer() {
 	}
 
 	/*
-		Static HTML Files Demo Mode
+		Html template
 	*/
 
 	if Storage.ServerHTTPDemo() {
@@ -57,7 +58,6 @@ func HTTPAPIServer() {
 		public.Any("/pages/multiview/full", HTTPAPIFullScreenMultiView)
 		public.GET("/pages/documentation", HTTPAPIServerDocumentation)
 		public.GET("/pages/player/all/:uuid/:channel", HTTPAPIPlayAll)
-		public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
 	}
 
 	/*
@@ -104,10 +104,17 @@ func HTTPAPIServer() {
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/segment/:segment/:any", HTTPAPIServerStreamHLSLLM4Segment)
 	public.GET("/stream/:uuid/channel/:channel/hlsll/live/fragment/:segment/:fragment/:any", HTTPAPIServerStreamHLSLLM4Fragment)
 	//MSE
-	public.GET("/stream/:uuid/channel/:channel/mse", HTTPAPIServerStreamMSE)
+	public.GET("/stream/:uuid/channel/:channel/mse", func(c *gin.Context) {
+		handler := websocket.Handler(HTTPAPIServerStreamMSE)
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
 	public.POST("/stream/:uuid/channel/:channel/webrtc", HTTPAPIServerStreamWebRTC)
-	//Save fragment to mp4
-	public.GET("/stream/:uuid/channel/:channel/save/mp4/fragment/:duration", HTTPAPIServerStreamSaveToMP4)
+	/*
+		Static HTML Files Demo Mode
+	*/
+	if Storage.ServerHTTPDemo() {
+		public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
+	}
 	/*
 		HTTPS Mode Cert
 		# Key considerations for algorithm "RSA" ≥ 2048-bit

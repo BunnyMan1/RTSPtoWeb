@@ -279,7 +279,7 @@ func RTSPServerClientHandle(conn net.Conn) {
 					"channel": channel,
 					"func":    "handleRTSPServerRequest",
 					"call":    "StreamChannelExist",
-				}).Errorln(ErrorStreamUnauthorized.Error())
+				}).Errorln(ErrorStreamNotFound.Error())
 				err = RTSPServerClientResponse(uuid, channel, conn, 401, map[string]string{"CSeq": strconv.Itoa(cSEQ)})
 				if err != nil {
 					return

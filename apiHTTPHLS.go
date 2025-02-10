@@ -26,14 +26,14 @@ func HTTPAPIServerStreamHLSM3U8(c *gin.Context) {
 		return
 	}
 
-	if !RemoteAuthorization("HLS", c.Param("uuid"), c.Param("channel"), c.Query("token"), c.ClientIP()) {
+	if !RemoteAuthorization("HLS", c.Param("uuid"), c.Param("channel"), c.Param("token"), c.ClientIP()) {
 		requestLogger.WithFields(logrus.Fields{
 			"call": "RemoteAuthorization",
-		}).Errorln(ErrorStreamUnauthorized.Error())
+		}).Errorln(ErrorStreamNotFound.Error())
 		return
 	}
 
-	c.Header("Content-Type", "application/vnd.apple.mpegurl")
+	c.Header("Content-Type", "application/x-mpegURL")
 	Storage.StreamChannelRun(c.Param("uuid"), c.Param("channel"))
 	//If stream mode on_demand need wait ready segment's
 	for i := 0; i < 40; i++ {
@@ -45,7 +45,7 @@ func HTTPAPIServerStreamHLSM3U8(c *gin.Context) {
 			}).Errorln(err.Error())
 			return
 		}
-		if seq >= 5 {
+		if seq >= 6 {
 			_, err := c.Writer.Write([]byte(index))
 			if err != nil {
 				c.IndentedJSON(400, Message{Status: 0, Payload: err.Error()})
@@ -84,7 +84,6 @@ func HTTPAPIServerStreamHLSTS(c *gin.Context) {
 		}).Errorln(err.Error())
 		return
 	}
-	c.Header("Content-Type", "video/MP2T")
 	outfile := bytes.NewBuffer([]byte{})
 	Muxer := ts.NewMuxer(outfile)
 	Muxer.PaddingToMakeCounterCont = true

@@ -131,22 +131,19 @@ func (obj *StorageST) StreamChannelInfo(uuid string, channelID string) (*Channel
 // StreamChannelCodecs get stream codec storage or wait
 func (obj *StorageST) StreamChannelCodecs(streamID string, channelID string) ([]av.CodecData, error) {
 	for i := 0; i < 100; i++ {
-		ret, err := (func() ([]av.CodecData, error) {
-			obj.mutex.RLock()
-			defer obj.mutex.RUnlock()
-			tmp, ok := obj.Streams[streamID]
-			if !ok {
-				return nil, ErrorStreamNotFound
-			}
-			channelTmp, ok := tmp.Channels[channelID]
-			if !ok {
-				return nil, ErrorStreamChannelNotFound
-			}
-			return channelTmp.codecs, nil
-		})()
+		obj.mutex.RLock()
+		tmp, ok := obj.Streams[streamID]
+		obj.mutex.RUnlock()
+		if !ok {
+			return nil, ErrorStreamNotFound
+		}
+		channelTmp, ok := tmp.Channels[channelID]
+		if !ok {
+			return nil, ErrorStreamChannelNotFound
+		}
 
-		if ret != nil || err != nil {
-			return ret, err
+		if channelTmp.codecs != nil {
+			return channelTmp.codecs, nil
 		}
 
 		time.Sleep(50 * time.Millisecond)
@@ -181,7 +178,21 @@ func (obj *StorageST) StreamChannelCast(key string, channelID string, val *av.Pa
 					if len(i2.outgoingAVPacket) < 1000 {
 						i2.outgoingAVPacket <- val
 					} else if len(i2.signals) < 10 {
+						//send stop signals to client
 						i2.signals <- SignalStreamStop
+						//No need close socket only send signal to reader / writer socket closed if client go to offline
+						/*
+							err := i2.socket.Close()
+							if err != nil {
+								log.WithFields(logrus.Fields{
+									"module":  "storage",
+									"stream":  key,
+									"channel": key,
+									"func":    "CastProxy",
+									"call":    "Close",
+								}).Errorln(err.Error())
+							}
+						*/
 					}
 				}
 				channelTmp.ack = time.Now()
@@ -206,7 +217,18 @@ func (obj *StorageST) StreamChannelCastProxy(key string, channelID string, val *
 					if len(i2.outgoingRTPPacket) < 1000 {
 						i2.outgoingRTPPacket <- val
 					} else if len(i2.signals) < 10 {
+						//send stop signals to client
 						i2.signals <- SignalStreamStop
+						err := i2.socket.Close()
+						if err != nil {
+							log.WithFields(logrus.Fields{
+								"module":  "storage",
+								"stream":  key,
+								"channel": key,
+								"func":    "CastProxy",
+								"call":    "Close",
+							}).Errorln(err.Error())
+						}
 					}
 				}
 				channelTmp.ack = time.Now()

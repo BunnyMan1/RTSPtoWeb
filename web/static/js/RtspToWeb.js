@@ -1,49 +1,49 @@
-var rtspPlayer={
-  active:false,
-  type:'live',
-  hls:null,
-  ws:null,
-  mseSourceBuffer:null,
-  mse:null,
-  mseQueue:[],
-  mseStreamingStarted:false,
-  webrtc:null,
-  webrtcSendChannel:null,
-  webrtcSendChannelInterval:null,
-  uuid:null,
+var rtspPlayer = {
+  active: false,
+  type: 'live',
+  hls: null,
+  ws: null,
+  mseSourceBuffer: null,
+  mse: null,
+  mseQueue: [],
+  mseStreamingStarted: false,
+  webrtc: null,
+  webrtcSendChannel: null,
+  webrtcSendChannelInterval: null,
+  uuid: null,
 
-  clearPlayer:function(){
-    if(this.active){
+  clearPlayer: function () {
+    if (this.active) {
 
-      if(this.hls!=null){
+      if (this.hls != null) {
         this.hls.destroy();
-        this.hls=null;
+        this.hls = null;
       }
-      if(this.ws!=null){
+      if (this.ws != null) {
         //close WebSocket connection if opened
         this.ws.close(1000);
-        this.ws=null;
+        this.ws = null;
       }
-      if(this.webrtc!=null){
+      if (this.webrtc != null) {
         clearInterval(this.webrtcSendChannelInterval);
 
-        this.webrtc=null;
+        this.webrtc = null;
       }
       $('#videoPlayer')[0].src = '';
       $('#videoPlayer')[0].load();
 
 
-      this.active=false;
+      this.active = false;
     }
   },
-  livePlayer:function(type,uuid){
+  livePlayer: function (type, uuid) {
     this.clearPlayer();
-    this.uuid=uuid;
-    this.active=true;
+    this.uuid = uuid;
+    this.active = true;
 
     $('.streams-vs-player').addClass('active-player');
-    if(type==0){
-      type=$('input[name=defaultPlayer]:checked').val()
+    if (type == 0) {
+      type = $('input[name=defaultPlayer]:checked').val()
     }
     switch (type) {
       case 'hls':
@@ -53,8 +53,8 @@ var rtspPlayer={
         this.playMse();
         break;
       case 'webrtc':
-          this.playWebrtc();
-          break;
+        this.playWebrtc();
+        break;
       default:
         Swal.fire(
           'Sorry',
@@ -65,9 +65,9 @@ var rtspPlayer={
     }
 
   },
-  playHls:function(){
-    if(this.hls==null && Hls.isSupported()){
-        this.hls = new Hls();
+  playHls: function () {
+    if (this.hls == null && Hls.isSupported()) {
+      this.hls = new Hls();
     }
     if ($("#videoPlayer")[0].canPlayType('application/vnd.apple.mpegurl')) {
       $("#videoPlayer")[0].src = this.streamPlayUrl('hls');
@@ -85,15 +85,15 @@ var rtspPlayer={
       }
     }
   },
-  playWebrtc:function(){
-    var _this=this;
-    this.webrtc=new RTCPeerConnection({
+  playWebrtc: function () {
+    var _this = this;
+    this.webrtc = new RTCPeerConnection({
       iceServers: [{
         urls: ["stun:stun.l.google.com:19302"]
       }]
     });
     this.webrtc.onnegotiationneeded = this.handleNegotiationNeeded;
-    this.webrtc.ontrack = function(event) {
+    this.webrtc.ontrack = function (event) {
       console.log(event.streams.length + ' track is delivered');
       $("#videoPlayer")[0].srcObject = event.streams[0];
       $("#videoPlayer")[0].play();
@@ -106,53 +106,51 @@ var rtspPlayer={
     this.webrtcSendChannel.onopen = () => {
       console.log('sendChannel has opened');
       this.webrtcSendChannel.send('ping');
-      this.webrtcSendChannelInterval =  setInterval(() => {
+      this.webrtcSendChannelInterval = setInterval(() => {
         this.webrtcSendChannel.send('ping');
       }, 1000)
     }
 
     this.webrtcSendChannel.onmessage = e => console.log(e.data);
   },
-  handleNegotiationNeeded: async function(){
-    var _this=rtspPlayer;
+  handleNegotiationNeeded: async function () {
+    var _this = rtspPlayer;
 
     offer = await _this.webrtc.createOffer();
     await _this.webrtc.setLocalDescription(offer);
-    $.post(_this.streamPlayUrl('webrtc'), {
-      data: btoa(_this.webrtc.localDescription.sdp)
-    }, function(data) {
-      //console.log(data)
-      try {
 
+    $.post(_this.streamPlayUrl('webrtc'), {
+      data: base64EncodeUnicode(_this.webrtc.localDescription.sdp)
+    }, function (data) {
+      console.log('Received SDP:', base64DecodeUnicode(data));  // Debugging the SDP
+      try {
         _this.webrtc.setRemoteDescription(new RTCSessionDescription({
           type: 'answer',
-          sdp: atob(data)
-        }))
-
-
-
+          sdp: base64DecodeUnicode(data)
+        }));
       } catch (e) {
-        console.warn(e);
+        console.warn('Failed to set remote description:', e);
       }
-
     });
+
   },
-  playMse:function(){
+
+  playMse: function () {
     //console.log(this.streamPlayUrl('mse'));
-    var _this=this;
+    var _this = this;
     this.mse = new MediaSource();
-    $("#videoPlayer")[0].src=window.URL.createObjectURL(this.mse);
-    this.mse.addEventListener('sourceopen', function(){
-      _this.ws=new WebSocket(_this.streamPlayUrl('mse'));
+    $("#videoPlayer")[0].src = window.URL.createObjectURL(this.mse);
+    this.mse.addEventListener('sourceopen', function () {
+      _this.ws = new WebSocket(_this.streamPlayUrl('mse'));
       _this.ws.binaryType = "arraybuffer";
-      _this.ws.onopen = function(event) {
+      _this.ws.onopen = function (event) {
         console.log('Connect to ws');
       }
 
-      _this.ws.onmessage = function(event) {
+      _this.ws.onmessage = function (event) {
         var data = new Uint8Array(event.data);
         if (data[0] == 9) {
-          decoded_arr=data.slice(1);
+          decoded_arr = data.slice(1);
           if (window.TextDecoder) {
             mimeCodec = new TextDecoder("utf-8").decode(decoded_arr);
           } else {
@@ -170,7 +168,7 @@ var rtspPlayer={
     }, false);
 
   },
-  readPacket:function(packet){
+  readPacket: function (packet) {
     if (!this.mseStreamingStarted) {
       this.mseSourceBuffer.appendBuffer(packet);
       this.mseStreamingStarted = true;
@@ -182,8 +180,8 @@ var rtspPlayer={
       this.pushPacket();
     }
   },
-  pushPacket:function(){
-    var _this=rtspPlayer;
+  pushPacket: function () {
+    var _this = rtspPlayer;
     if (!_this.mseSourceBuffer.updating) {
       if (_this.mseQueue.length > 0) {
         packet = _this.mseQueue.shift();
@@ -194,7 +192,7 @@ var rtspPlayer={
       }
     }
   },
-  streamPlayUrl:function(type){
+  streamPlayUrl: function (type) {
     switch (type) {
       case 'hls':
         return '/stream/' + this.uuid + '/hls/live/index.m3u8';
@@ -204,15 +202,26 @@ var rtspPlayer={
         if (location.protocol == 'https:') {
           potocol = 'wss';
         }
-        return potocol+'://'+location.host+'/stream/' + this.uuid +'/mse?uuid='+this.uuid;
+        return potocol + '://' + location.host + '/stream/' + this.uuid + '/mse?uuid=' + this.uuid;
         //return 'ws://sr4.ipeye.ru/ws/mp4/live?name=d4ee855e40874ef7b7149357a42f18f0';
         break;
       case 'webrtc':
-        return  "/stream/"+this.uuid+"/webrtc?uuid=" + this.uuid;
+        return "/stream/" + this.uuid + "/webrtc?uuid=" + this.uuid;
         break;
       default:
         return '';
     }
   }
 
+}
+function base64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+    return String.fromCharCode('0x' + p1);
+  }));
+}
+
+function base64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
 }

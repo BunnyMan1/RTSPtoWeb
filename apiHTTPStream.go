@@ -7,12 +7,7 @@ import (
 
 //HTTPAPIServerStreams function return stream list
 func HTTPAPIServerStreams(c *gin.Context) {
-	list, err := Storage.MarshalledStreamsList()
-	if err != nil {
-		c.IndentedJSON(500, Message{Status: 0, Payload: err.Error()})
-		return
-	}
-	c.IndentedJSON(200, Message{Status: 1, Payload: list})
+	c.IndentedJSON(200, Message{Status: 1, Payload: Storage.StreamsList()})
 }
 
 //HTTPAPIServerStreamsMultiControlAdd function add new stream's
