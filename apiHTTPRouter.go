@@ -61,6 +61,11 @@ func HTTPAPIServer() {
 	}
 
 	/*
+		Health Check endpoint
+	*/
+	public.GET("/health", HTTPAPIHealthCheck)
+
+	/*
 		Stream Control elements
 	*/
 
@@ -283,6 +288,18 @@ func HTTPAPIFullScreenMultiView(c *gin.Context) {
 		"options": createParams,
 		"page":    "fullscreenmulti",
 		"query":   c.Request.URL.Query(),
+	})
+}
+
+// HTTPAPIHealthCheck health check endpoint
+func HTTPAPIHealthCheck(c *gin.Context) {
+	c.IndentedJSON(200, Message{
+		Status: 1,
+		Payload: gin.H{
+			"status":    "healthy",
+			"timestamp": time.Now().Unix(),
+			"service":   "RTSPtoWeb",
+		},
 	})
 }
 
